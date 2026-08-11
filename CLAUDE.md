@@ -49,6 +49,16 @@ Table and column names are uppercase; JPA entities map to them explicitly via `@
 
 `docker-compose.yml` provisions a MySQL 8.4 container (`migraflow` db/user/password: `migraflow`) matching the credentials in `application-local.properties`.
 
+## Frontend
+
+Server-rendered JSP + vanilla JS/CSS, packaged as a `war` (not React/SPA):
+
+- `plugins { id 'war' }` in `build.gradle`, with `providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'` and `implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'` so `bootRun` serves JSPs via embedded Tomcat
+- **Known Gradle gotcha**: this project uses Gradle's native `implementation platform('org.springframework.boot:spring-boot-dependencies:4.1.0')` for BOM import instead of the `io.spring.dependency-management` plugin — that plugin globally excludes `org.springframework:spring-web` when resolving against this Spring Boot 4.1 / Spring Framework 7 combination (visible as `Excluding [org.springframework:spring-web]` in `--info` logs), which breaks `bootRun` with `ClassNotFoundException: ...StandardServletEnvironment`. Don't reintroduce that plugin without re-checking this.
+- JSP views live in `src/main/webapp/WEB-INF/jsp/<feature>/*.jsp`, resolved via `spring.mvc.view.prefix`/`suffix` in `application.properties`; a `@Controller` (not `@RestController`) per feature returns the view name, e.g. `io.migraflow.project.controller.ProjectPageController`
+- Pages are a thin JSP shell + `fetch` calls to the same JSON REST API the `@RestController`s already expose — no server-side data binding beyond simple `Model` attributes (e.g. `projectId`) the JSP inlines into a `<script>` block for the page's JS to read
+- Static JS/CSS live in `src/main/resources/static/{js,css}`; `static/js/api.js` is the shared fetch helper other page scripts (`projects.js`, `jobs.js`) call into — mirror that pattern for new screens rather than inlining fetch calls per page
+
 ## Data Migration Feature (`io.migraflow.migration`)
 
 ### Domain overview
