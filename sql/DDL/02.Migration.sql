@@ -1,6 +1,7 @@
 create table MIGRATION_JOB
 (
     ID                 bigint auto_increment comment '이관 작업 ID' primary key,
+    PROJECT_ID         bigint                              not null comment '소속 프로젝트 ID',
     NAME               varchar(200)                        not null comment '작업명',
     TARGET_ENTITY_NAME varchar(100)                        not null comment 'TO-BE 매핑 대상 엔티티/테이블명',
     SOURCE_TYPE        int                                 not null comment 'AS-IS 수집 방식 (0:DB, 1:API, 2:FILE)',
@@ -15,8 +16,13 @@ create table MIGRATION_JOB
     EXECUTE_START_DATE timestamp                           null comment '최근 배치 실행 시작 일시',
     EXECUTE_END_DATE   timestamp                           null comment '최근 배치 실행 종료 일시',
     CREATE_DATE        timestamp default CURRENT_TIMESTAMP not null comment '생성일',
-    UPDATED_DATE       timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '수정일'
+    UPDATED_DATE       timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '수정일',
+    constraint FK_MIGRATION_JOB_PROJECT_ID
+        foreign key (PROJECT_ID) references PROJECT (ID)
 );
+
+create index IDX_MIGRATION_JOB_PROJECT_ID
+    on MIGRATION_JOB (PROJECT_ID);
 
 create table MIGRATION_JOB_APPROVAL_HISTORY
 (
