@@ -46,6 +46,15 @@ public class MigrationMappingRule {
     @Column(name = "UPDATED_DATE", insertable = false, updatable = false)
     private LocalDateTime updatedDate;
 
+    /**
+     * AS-IS 필드를 TO-BE 필드로 변환하는 매핑 규칙을 활성 상태로 생성한다.
+     *
+     * @param targetEntityName 규칙이 적용될 대상 엔티티명
+     * @param sourceFieldName  AS-IS 필드명
+     * @param targetFieldName  TO-BE 필드명
+     * @param ruleType         매핑/변환 규칙 타입
+     * @param expression       변환 표현식
+     */
     public MigrationMappingRule(String targetEntityName, String sourceFieldName, String targetFieldName,
                                  MigrationMappingRuleType ruleType, String expression) {
         this.targetEntityName = targetEntityName;
@@ -56,18 +65,34 @@ public class MigrationMappingRule {
         this.useYn = true;
     }
 
+    /**
+     * 저장된 코드 값을 {@link MigrationMappingRuleType} enum으로 변환하여 반환한다.
+     *
+     * @return 매핑/변환 규칙 타입
+     */
     public MigrationMappingRuleType getRuleType() {
         return MigrationMappingRuleType.fromCode(ruleType);
     }
 
+    /**
+     * 변환 표현식을 수정한다.
+     *
+     * @param expression 새 변환 표현식
+     */
     public void changeExpression(String expression) {
         this.expression = expression;
     }
 
+    /**
+     * 매핑 규칙을 활성화하여 이후 매핑 적용 시 사용되도록 한다.
+     */
     public void activate() {
         this.useYn = true;
     }
 
+    /**
+     * 매핑 규칙을 비활성화하여 이후 매핑 적용 시 사용되지 않도록 한다.
+     */
     public void deactivate() {
         this.useYn = false;
     }

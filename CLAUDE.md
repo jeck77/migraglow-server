@@ -22,6 +22,21 @@ Spring Boot 4.1 / Java 21 project, organized **package-by-feature** under `io.mi
 
 Enum-backed status fields are stored as `Integer` columns on the entity, with a getter that converts via the enum (see `Project.status` / `ProjectStatus.fromCode`), so the raw DB value and the typed enum both stay accessible.
 
+### Method documentation
+
+Every method (including private helpers, entity state-change methods, and JPA repository query methods) gets a `/** ... */` Javadoc comment directly above it, written in Korean, describing what it does. Constructors that carry domain meaning (e.g. an entity's public constructor, or a DTO's `ResponseDto(Entity entity)` conversion constructor) are documented the same way. Use `@param`, `@return`, and `@throws` tags where applicable — see `MigrationJobService`, `Project`, or `MigrationJobStatus` for the expected style. DTO `record` declarations also get a Javadoc block above the `record` keyword itself, with one `@param` per component (see `MigrationJobResponse`, `ProjectCreateRequest`).
+
+**This applies going forward to all new code, not just the files already documented**: whenever you add a new method, constructor, or `record` (in any layer — controller/service/domain/dto/repository), add the matching `/** ... */` Javadoc in the same pass, don't leave it for a follow-up.
+
+### User-facing message text lives in `messages.properties`
+
+Korean text that is returned to API callers (exception messages, validation messages) is **not** hardcoded as a string literal — it's centralized in `src/main/resources/messages.properties` and looked up by key. This is separate from Javadoc, which stays inline.
+
+- Domain/service code throws exceptions with a **message key** as the exception message, e.g. `throw new IllegalStateException("migrationJob.submit.invalidState");` (see `MigrationJob`). Keys follow `<entity>.<action>.<reason>` in lowerCamelCase.
+- The corresponding text lives in `messages.properties`, e.g. `migrationJob.submit.invalidState=등록/보정 또는 반려 상태에서만 제출할 수 있습니다.`
+- The `@ExceptionHandler` that turns the exception into an HTTP response resolves the key via a `MessageSource` field (`messageSource.getMessage(e.getMessage(), null, e.getMessage(), LocaleContextHolder.getLocale())`, falling back to the raw key text if unresolved) — see `MigrationJobController.handleIllegalState`. Domain/service classes never depend on `MessageSource` directly (entities aren't Spring beans); resolution only happens at the controller boundary.
+- Add every new user-facing message this way going forward — don't inline Korean text in a `throw` again.
+
 ### Database schema is NOT managed by Hibernate
 
 `spring.jpa.hibernate.ddl-auto=none` — schema changes must be written by hand as SQL files under `sql/`, not generated from entities. `sql/` is organized in numbered directories mirroring the order scripts should run in (e.g. `sql/01.User/`, `sql/02.Table/01.Project/`).

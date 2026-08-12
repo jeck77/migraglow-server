@@ -40,6 +40,11 @@ public class MigrationExecutionHistory {
     @Column(name = "FAIL_CNT", nullable = false)
     private Integer failCnt;
 
+    /**
+     * 배치 실행 이력을 RUNNING 상태로 생성한다.
+     *
+     * @param jobId 실행 대상 이관 작업 ID
+     */
     public MigrationExecutionHistory(Long jobId) {
         this.jobId = jobId;
         this.status = MigrationExecutionStatus.RUNNING.getCode();
@@ -47,10 +52,21 @@ public class MigrationExecutionHistory {
         this.failCnt = 0;
     }
 
+    /**
+     * 저장된 코드 값을 {@link MigrationExecutionStatus} enum으로 변환하여 반환한다.
+     *
+     * @return 현재 실행 상태
+     */
     public MigrationExecutionStatus getStatus() {
         return MigrationExecutionStatus.fromCode(status);
     }
 
+    /**
+     * 배치 실행을 성공적으로 완료 처리한다.
+     *
+     * @param successCnt 성공 건수
+     * @param failCnt    실패 건수
+     */
     public void complete(int successCnt, int failCnt) {
         this.status = MigrationExecutionStatus.COMPLETED.getCode();
         this.successCnt = successCnt;
@@ -58,6 +74,12 @@ public class MigrationExecutionHistory {
         this.endDate = LocalDateTime.now();
     }
 
+    /**
+     * 배치 실행을 실패 처리한다.
+     *
+     * @param successCnt 실패 시점까지의 성공 건수
+     * @param failCnt    실패 건수
+     */
     public void fail(int successCnt, int failCnt) {
         this.status = MigrationExecutionStatus.FAILED.getCode();
         this.successCnt = successCnt;

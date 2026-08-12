@@ -34,6 +34,13 @@ public class MigrationMappingRuleValue {
     @Column(name = "CREATE_DATE", insertable = false, updatable = false)
     private LocalDateTime createDate;
 
+    /**
+     * VALUE_MAP 타입 매핑 규칙에서 사용할 AS-IS/TO-BE 값 쌍을 생성한다.
+     *
+     * @param ruleId      대상 매핑 규칙 ID
+     * @param sourceValue AS-IS 값
+     * @param targetValue TO-BE 값
+     */
     public MigrationMappingRuleValue(Long ruleId, String sourceValue, String targetValue) {
         this.ruleId = ruleId;
         this.sourceValue = sourceValue;

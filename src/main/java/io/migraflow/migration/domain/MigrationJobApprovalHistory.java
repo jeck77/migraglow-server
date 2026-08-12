@@ -40,6 +40,14 @@ public class MigrationJobApprovalHistory {
     @Column(name = "CREATE_DATE", insertable = false, updatable = false)
     private LocalDateTime createDate;
 
+    /**
+     * 이관 작업에 대한 제출/승인/반려 이력 한 건을 생성한다.
+     *
+     * @param jobId      대상 이관 작업 ID
+     * @param actionType 수행된 액션 타입 (제출/승인/반려)
+     * @param actorId    액션을 수행한 사용자 ID
+     * @param reason     사유 (반려 시)
+     */
     public MigrationJobApprovalHistory(Long jobId, MigrationJobActionType actionType, Long actorId, String reason) {
         this.jobId = jobId;
         this.actionType = actionType.getCode();
@@ -48,6 +56,11 @@ public class MigrationJobApprovalHistory {
         this.reason = reason;
     }
 
+    /**
+     * 저장된 코드 값을 {@link MigrationJobActionType} enum으로 변환하여 반환한다.
+     *
+     * @return 수행된 액션 타입
+     */
     public MigrationJobActionType getActionType() {
         return MigrationJobActionType.fromCode(actionType);
     }

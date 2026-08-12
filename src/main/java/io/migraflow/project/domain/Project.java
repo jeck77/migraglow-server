@@ -37,16 +37,32 @@ public class Project {
     @Column(name = "UPDATED_DATE", insertable = false, updatable = false)
     private LocalDateTime updatedDate;
 
+    /**
+     * ACTIVE 상태의 신규 프로젝트를 생성한다.
+     *
+     * @param name        프로젝트명
+     * @param description 프로젝트 설명
+     */
     public Project(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = ProjectStatus.ACTIVE.getCode();
     }
 
+    /**
+     * 저장된 코드 값을 {@link ProjectStatus} enum으로 변환하여 반환한다.
+     *
+     * @return 현재 프로젝트 상태
+     */
     public ProjectStatus getStatus() {
         return ProjectStatus.fromCode(status);
     }
 
+    /**
+     * 프로젝트 상태를 변경한다.
+     *
+     * @param status 변경할 상태
+     */
     public void changeStatus(ProjectStatus status) {
         this.status = status.getCode();
     }
