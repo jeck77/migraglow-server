@@ -1,11 +1,13 @@
 package io.migraflow.migration.controller;
 
+import io.migraflow.migration.dto.ColumnInfoResponse;
 import io.migraflow.migration.dto.MigrationJobActionRequest;
 import io.migraflow.migration.dto.MigrationJobApprovalHistoryResponse;
 import io.migraflow.migration.dto.MigrationJobCreateRequest;
 import io.migraflow.migration.dto.MigrationJobRejectRequest;
 import io.migraflow.migration.dto.MigrationJobResponse;
 import io.migraflow.migration.service.MigrationJobService;
+import io.migraflow.migration.service.MigrationSchemaConnectionException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -75,6 +77,30 @@ public class MigrationJobController {
     }
 
     /**
+     * 이관 작업 등록 시 선택한 AS-IS 테이블의 컬럼 목록을 조회한다. 저장된 sourceConfig의 접속 정보로 서버가 직접
+     * 조회하며, 비밀번호는 응답에 포함되지 않는다.
+     *
+     * @param jobId 이관 작업 ID
+     * @return AS-IS 테이블의 컬럼 메타데이터 목록
+     */
+    @GetMapping("/api/migration-jobs/{jobId}/source-columns")
+    public List<ColumnInfoResponse> getSourceColumns(@PathVariable Long jobId) {
+        return migrationJobService.getSourceColumns(jobId);
+    }
+
+    /**
+     * 이관 작업 등록 시 선택한 TO-BE 테이블의 컬럼 목록을 조회한다. 저장된 targetConfig의 접속 정보로 서버가 직접
+     * 조회하며, 비밀번호는 응답에 포함되지 않는다.
+     *
+     * @param jobId 이관 작업 ID
+     * @return TO-BE 테이블의 컬럼 메타데이터 목록 (기본키 컬럼 여부 포함)
+     */
+    @GetMapping("/api/migration-jobs/{jobId}/target-columns")
+    public List<ColumnInfoResponse> getTargetColumns(@PathVariable Long jobId) {
+        return migrationJobService.getTargetColumns(jobId);
+    }
+
+    /**
      * 이관 작업을 승인 대기 상태로 제출한다.
      *
      * @param jobId   이관 작업 ID
@@ -133,5 +159,19 @@ public class MigrationJobController {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleNotFound(EntityNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    /**
+     * AS-IS/TO-BE 컬럼 조회 중 DB 접속 실패로 발생한 {@link MigrationSchemaConnectionException}을 502 Bad Gateway
+     * 응답으로 변환한다. 메시지는 {@code messages.properties}에 정의된 키로 취급하여 {@link MessageSource}로 실제
+     * 텍스트를 조회한다.
+     *
+     * @param e 발생한 예외
+     * @return 조회된 메시지를 담은 502 응답
+     */
+    @ExceptionHandler(MigrationSchemaConnectionException.class)
+    public ResponseEntity<String> handleSchemaConnectionFailure(MigrationSchemaConnectionException e) {
+        String message = messageSource.getMessage(e.getMessage(), null, e.getMessage(), LocaleContextHolder.getLocale());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(message);
     }
 }

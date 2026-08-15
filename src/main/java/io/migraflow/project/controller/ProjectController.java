@@ -2,6 +2,7 @@ package io.migraflow.project.controller;
 
 import io.migraflow.project.dto.ProjectCreateRequest;
 import io.migraflow.project.dto.ProjectResponse;
+import io.migraflow.project.dto.ProjectUpdateRequest;
 import io.migraflow.project.service.ProjectService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,6 +56,18 @@ public class ProjectController {
     @GetMapping("/{projectId}")
     public ProjectResponse get(@PathVariable Long projectId) {
         return projectService.get(projectId);
+    }
+
+    /**
+     * 프로젝트명/설명을 수정하고, 필요 시 AS-IS/TO-BE 접속 설정을 교체한다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param request   수정할 프로젝트명/설명, 필요 시 새 접속 설정
+     * @return 수정된 프로젝트 정보
+     */
+    @PutMapping("/{projectId}")
+    public ProjectResponse update(@PathVariable Long projectId, @Valid @RequestBody ProjectUpdateRequest request) {
+        return projectService.update(projectId, request);
     }
 
     /**

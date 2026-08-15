@@ -34,6 +34,12 @@ public class MigrationRecord {
     @Column(name = "STATUS", nullable = false)
     private Integer status;
 
+    @Column(name = "TARGET_KEY")
+    private String targetKey;
+
+    @Column(name = "EXECUTION_ID")
+    private Long executionId;
+
     @Column(name = "ERROR_MESSAGE")
     private String errorMessage;
 
@@ -88,20 +94,27 @@ public class MigrationRecord {
     }
 
     /**
-     * 배치 실행을 통해 TO-BE 반영이 성공했음을 표시하고 이전 에러 메시지를 초기화한다.
+     * 배치 실행을 통해 TO-BE 반영이 성공했음을 표시하고, TO-BE 키 값과 처리한 실행 회차를 기록하며 이전 에러 메시지를 초기화한다.
+     *
+     * @param targetKey   TO-BE 반영 후 생성/확인된 키 값
+     * @param executionId 이 레코드를 처리한 배치 실행 ID
      */
-    public void markExecuted() {
+    public void markExecuted(String targetKey, Long executionId) {
         this.status = MigrationRecordStatus.EXECUTED.getCode();
+        this.targetKey = targetKey;
+        this.executionId = executionId;
         this.errorMessage = null;
     }
 
     /**
-     * 배치 실행 중 TO-BE 반영이 실패했음을 표시한다.
+     * 배치 실행 중 TO-BE 반영이 실패했음을 표시하고, 실패를 유발한 실행 회차를 기록한다.
      *
      * @param errorMessage 실패 사유
+     * @param executionId  이 레코드를 처리하다 실패한 배치 실행 ID
      */
-    public void markFailed(String errorMessage) {
+    public void markFailed(String errorMessage, Long executionId) {
         this.status = MigrationRecordStatus.FAILED.getCode();
         this.errorMessage = errorMessage;
+        this.executionId = executionId;
     }
 }

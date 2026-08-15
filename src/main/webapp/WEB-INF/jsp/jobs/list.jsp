@@ -8,21 +8,17 @@
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
-<header class="app-header">
-    <a href="/" class="app-title">Migraflow</a>
-</header>
+<%@ include file="/WEB-INF/jsp/common/header.jsp" %>
 <main class="app-main">
     <div class="breadcrumb"><a href="/">프로젝트</a> / <span id="project-name">...</span></div>
     <div class="page-header">
         <h2>이관 작업</h2>
+        <a class="secondary" href="/projects/${projectId}/edit?from=/projects/${projectId}/jobs">프로젝트 수정</a>
     </div>
 
     <div id="error" class="error" style="display:none;"></div>
 
     <div class="card">
-        <div class="form-row">
-            <label>담당자 ID: <input type="number" id="actor-id" value="1" style="width:60px;"></label>
-        </div>
         <form id="create-form">
             <div class="form-row">
                 <input type="text" id="name" placeholder="작업명" required>
@@ -33,7 +29,29 @@
                     <option value="FILE">FILE</option>
                 </select>
             </div>
-            <div class="form-row">
+            <div id="db-schema-panel" class="db-schema-panel">
+                <div class="db-schema-col">
+                    <h4>AS-IS 테이블</h4>
+                    <div class="form-row">
+                        <select id="asis-table-select">
+                            <option value="">-- 불러오는 중... --</option>
+                        </select>
+                        <span id="asis-schema-status" class="schema-status"></span>
+                    </div>
+                    <div id="asis-columns" class="schema-columns"></div>
+                </div>
+                <div class="db-schema-col">
+                    <h4>TO-BE 테이블</h4>
+                    <div class="form-row">
+                        <select id="tobe-table-select">
+                            <option value="">-- 불러오는 중... --</option>
+                        </select>
+                        <span id="tobe-schema-status" class="schema-status"></span>
+                    </div>
+                    <div id="tobe-columns" class="schema-columns"></div>
+                </div>
+            </div>
+            <div class="form-row" id="source-config-row" style="display:none;">
                 <textarea id="source-config" placeholder="소스 설정 (선택, JSON 문자열)"></textarea>
             </div>
             <div class="form-row">

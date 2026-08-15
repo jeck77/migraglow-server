@@ -25,7 +25,7 @@ public class MigrationMappingRule {
     @Column(name = "TARGET_ENTITY_NAME", nullable = false)
     private String targetEntityName;
 
-    @Column(name = "SOURCE_FIELD_NAME", nullable = false)
+    @Column(name = "SOURCE_FIELD_NAME")
     private String sourceFieldName;
 
     @Column(name = "TARGET_FIELD_NAME", nullable = false)
@@ -50,10 +50,10 @@ public class MigrationMappingRule {
      * AS-IS 필드를 TO-BE 필드로 변환하는 매핑 규칙을 활성 상태로 생성한다.
      *
      * @param targetEntityName 규칙이 적용될 대상 엔티티명
-     * @param sourceFieldName  AS-IS 필드명
+     * @param sourceFieldName  AS-IS 필드명. {@code ruleType}이 {@code FIXED_VALUE}면 소스 없이 고정값만 쓰므로 null 허용
      * @param targetFieldName  TO-BE 필드명
      * @param ruleType         매핑/변환 규칙 타입
-     * @param expression       변환 표현식
+     * @param expression       변환 표현식. {@code EXPRESSION} 타입은 변환식, {@code FIXED_VALUE} 타입은 고정값 그 자체를 담는다
      */
     public MigrationMappingRule(String targetEntityName, String sourceFieldName, String targetFieldName,
                                  MigrationMappingRuleType ruleType, String expression) {

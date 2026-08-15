@@ -37,6 +37,9 @@ public class MigrationJob {
     @Column(name = "SOURCE_CONFIG", columnDefinition = "json")
     private String sourceConfig;
 
+    @Column(name = "TARGET_CONFIG", columnDefinition = "json")
+    private String targetConfig;
+
     @Column(name = "STATUS", nullable = false)
     private Integer status;
 
@@ -77,16 +80,18 @@ public class MigrationJob {
      * @param name             작업명
      * @param targetEntityName 이관 대상 엔티티명
      * @param sourceType       AS-IS 데이터 수집 방식
-     * @param sourceConfig     소스 접속/조회 설정(JSON)
+     * @param sourceConfig     AS-IS 접속/조회 설정(JSON)
+     * @param targetConfig     TO-BE DB 접속 설정(JSON)
      * @param createdById      등록자 ID
      */
     public MigrationJob(Long projectId, String name, String targetEntityName, MigrationSourceType sourceType,
-                         String sourceConfig, Long createdById) {
+                         String sourceConfig, String targetConfig, Long createdById) {
         this.projectId = projectId;
         this.name = name;
         this.targetEntityName = targetEntityName;
         this.sourceType = sourceType.getCode();
         this.sourceConfig = sourceConfig;
+        this.targetConfig = targetConfig;
         this.status = MigrationJobStatus.DRAFT.getCode();
         this.createdById = createdById;
     }

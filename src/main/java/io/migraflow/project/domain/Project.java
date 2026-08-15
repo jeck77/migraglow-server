@@ -28,6 +28,12 @@ public class Project {
     @Column(name = "DESCRIPTION")
     private String description;
 
+    @Column(name = "SOURCE_CONFIG", columnDefinition = "json")
+    private String sourceConfig;
+
+    @Column(name = "TARGET_CONFIG", columnDefinition = "json")
+    private String targetConfig;
+
     @Column(name = "STATUS", nullable = false)
     private Integer status;
 
@@ -40,12 +46,16 @@ public class Project {
     /**
      * ACTIVE 상태의 신규 프로젝트를 생성한다.
      *
-     * @param name        프로젝트명
-     * @param description 프로젝트 설명
+     * @param name          프로젝트명
+     * @param description   프로젝트 설명
+     * @param sourceConfig  AS-IS DB 접속 설정(JSON). 프로젝트 소속 이관 작업들이 공유하는 접속 정보다
+     * @param targetConfig  TO-BE DB 접속 설정(JSON)
      */
-    public Project(String name, String description) {
+    public Project(String name, String description, String sourceConfig, String targetConfig) {
         this.name = name;
         this.description = description;
+        this.sourceConfig = sourceConfig;
+        this.targetConfig = targetConfig;
         this.status = ProjectStatus.ACTIVE.getCode();
     }
 
@@ -65,5 +75,34 @@ public class Project {
      */
     public void changeStatus(ProjectStatus status) {
         this.status = status.getCode();
+    }
+
+    /**
+     * 프로젝트명과 설명을 수정한다.
+     *
+     * @param name        새 프로젝트명
+     * @param description 새 프로젝트 설명
+     */
+    public void changeDetails(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
+    /**
+     * AS-IS DB 접속 설정을 교체한다.
+     *
+     * @param sourceConfig 새 AS-IS DB 접속 설정(JSON)
+     */
+    public void changeSourceConfig(String sourceConfig) {
+        this.sourceConfig = sourceConfig;
+    }
+
+    /**
+     * TO-BE DB 접속 설정을 교체한다.
+     *
+     * @param targetConfig 새 TO-BE DB 접속 설정(JSON)
+     */
+    public void changeTargetConfig(String targetConfig) {
+        this.targetConfig = targetConfig;
     }
 }

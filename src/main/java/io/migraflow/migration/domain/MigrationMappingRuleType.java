@@ -6,7 +6,8 @@ public enum MigrationMappingRuleType {
 
     DIRECT(0),
     VALUE_MAP(1),
-    EXPRESSION(2);
+    EXPRESSION(2),
+    FIXED_VALUE(3);
 
     private final int code;
 

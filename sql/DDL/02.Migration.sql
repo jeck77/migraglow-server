@@ -6,6 +6,7 @@ create table MIGRATION_JOB
     TARGET_ENTITY_NAME varchar(100)                        not null comment 'TO-BE 매핑 대상 엔티티/테이블명',
     SOURCE_TYPE        int                                 not null comment 'AS-IS 수집 방식 (0:DB, 1:API, 2:FILE)',
     SOURCE_CONFIG      json                                null comment '소스타입별 접속/조회 설정 (SOURCE_TYPE에 따라 shape 다름)',
+    TARGET_CONFIG      json                                null comment 'TO-BE DB 접속 설정 (jdbcUrl/username/password)',
     STATUS             int       default 0                 not null comment '작업 상태 (0:DRAFT, 1:SUBMITTED, 2:APPROVED, 3:REJECTED, 4:EXECUTING, 5:COMPLETED, 6:FAILED)',
     CREATED_BY_ID      bigint                              not null comment '등록 담당자 ID',
     SUBMITTED_BY_ID    bigint                              null comment '최근 제출 담당자 ID',
@@ -44,10 +45,10 @@ create table MIGRATION_MAPPING_RULE
 (
     ID                 bigint auto_increment comment '매핑 규칙 ID' primary key,
     TARGET_ENTITY_NAME varchar(100)                        not null comment '매핑 대상 엔티티/테이블명',
-    SOURCE_FIELD_NAME  varchar(100)                        not null comment 'AS-IS 필드명',
+    SOURCE_FIELD_NAME  varchar(100)                        null comment 'AS-IS 필드명 (RULE_TYPE=FIXED_VALUE면 소스 없이 고정값만 쓰므로 null)',
     TARGET_FIELD_NAME  varchar(100)                        not null comment 'TO-BE 필드명',
-    RULE_TYPE          int                                 not null comment '규칙 유형 (0:DIRECT, 1:VALUE_MAP, 2:EXPRESSION)',
-    EXPRESSION         varchar(500)                        null comment 'RULE_TYPE=EXPRESSION일 때 변환식',
+    RULE_TYPE          int                                 not null comment '규칙 유형 (0:DIRECT, 1:VALUE_MAP, 2:EXPRESSION, 3:FIXED_VALUE)',
+    EXPRESSION         varchar(500)                        null comment 'RULE_TYPE=EXPRESSION이면 변환식, FIXED_VALUE면 고정값',
     USE_YN             tinyint(1) default 1                not null comment '사용 여부',
     CREATE_DATE        timestamp default CURRENT_TIMESTAMP not null comment '생성일',
     UPDATED_DATE       timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '수정일',
@@ -76,15 +77,22 @@ create table MIGRATION_RECORD
     SOURCE_KEY    varchar(255)                        not null comment 'AS-IS 원본 식별자',
     RAW_DATA      json                                not null comment 'AS-IS 원본 레코드 스냅샷',
     STATUS        int       default 0                 not null comment '레코드 상태 (0:COLLECTED, 1:MAPPED, 2:CORRECTED, 3:EXCLUDED, 4:EXECUTED, 5:FAILED)',
+    TARGET_KEY    varchar(255)                        null comment 'TO-BE 반영 후 생성/확인된 키 값 (미실행 시 null)',
+    EXECUTION_ID  bigint                              null comment '이 레코드를 처리한 배치 실행 ID',
     ERROR_MESSAGE varchar(1000)                       null comment '배치 실행 실패 사유',
     CREATE_DATE   timestamp default CURRENT_TIMESTAMP not null comment '생성일',
     UPDATED_DATE  timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '수정일',
     constraint FK_MIGRATION_RECORD_JOB_ID
-        foreign key (JOB_ID) references MIGRATION_JOB (ID)
+        foreign key (JOB_ID) references MIGRATION_JOB (ID),
+    constraint UK_MIGRATION_RECORD_JOB_SOURCE_KEY
+        unique (JOB_ID, SOURCE_KEY)
 );
 
 create index IDX_MIGRATION_RECORD_JOB_ID_STATUS
     on MIGRATION_RECORD (JOB_ID, STATUS);
+
+create index IDX_MIGRATION_RECORD_JOB_ID_TARGET_KEY
+    on MIGRATION_RECORD (JOB_ID, TARGET_KEY);
 
 create table MIGRATION_RECORD_FIELD
 (
@@ -120,3 +128,7 @@ create table MIGRATION_EXECUTION_HISTORY
 
 create index IDX_MIGRATION_EXECUTION_HISTORY_JOB_ID
     on MIGRATION_EXECUTION_HISTORY (JOB_ID);
+
+alter table MIGRATION_RECORD
+    add constraint FK_MIGRATION_RECORD_EXECUTION_ID
+        foreign key (EXECUTION_ID) references MIGRATION_EXECUTION_HISTORY (ID);

@@ -10,7 +10,8 @@ import jakarta.validation.constraints.NotNull;
  * @param name             작업명
  * @param targetEntityName 이관 대상 엔티티명
  * @param sourceType       AS-IS 데이터 수집 방식
- * @param sourceConfig     소스 접속/조회 설정(JSON)
+ * @param sourceConfig     AS-IS 접속/조회 설정(JSON)
+ * @param targetConfig     TO-BE DB 접속 설정(JSON)
  * @param createdById      등록자 ID
  */
 public record MigrationJobCreateRequest(
@@ -18,6 +19,7 @@ public record MigrationJobCreateRequest(
         @NotBlank String targetEntityName,
         @NotNull MigrationSourceType sourceType,
         String sourceConfig,
+        String targetConfig,
         @NotNull Long createdById
 ) {
 }
